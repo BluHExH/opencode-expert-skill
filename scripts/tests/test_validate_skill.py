@@ -1,6 +1,7 @@
 import importlib.util
 import json
 import pathlib
+import sys
 import tempfile
 import unittest
 
@@ -8,8 +9,11 @@ SCRIPT_PATH = pathlib.Path(__file__).resolve().parents[2] / "scripts" / "validat
 
 
 def load_validator():
+    # Register module before exec so @dataclass can resolve typing namespace (Python 3.12).
     spec = importlib.util.spec_from_file_location("validate_skill_under_test", str(SCRIPT_PATH))
     module = importlib.util.module_from_spec(spec)
+    assert spec.loader is not None
+    sys.modules[spec.name] = module
     spec.loader.exec_module(module)
     return module
 
@@ -102,6 +106,75 @@ class TestValidateSkill(unittest.TestCase):
             findings = self.validator.run_checks(root)
             warnings = [f for f in findings if f.severity == "WARNING"]
             self.assertTrue(any("Mermaid block without recognized diagram keyword" in f.message for f in warnings))
+
+
+
+    def test_repo_clone_directory_name_mismatch_is_not_error(self):
+        """Clone folders may differ from skill name outside skills/ layout."""
+        with tempfile.TemporaryDirectory() as tmp:
+            root = pathlib.Path(tmp) / "opencode-expert-skill-ro"
+            root.mkdir(parents=True, exist_ok=True)
+            # reuse helper structure under mismatched name
+            (root / "SKILL.md").write_text(
+                "---\nname: opencode-expert\ndescription: Technical research skill for OpenCode architecture.\n---\n\n# Skill\n",
+                encoding="utf-8",
+            )
+            (root / "README.md").write_text("ok\n", encoding="utf-8")
+            (root / "CHANGELOG.md").write_text("# Changelog\n", encoding="utf-8")
+            src = root / "sources"
+            src.mkdir(parents=True, exist_ok=True)
+            (src / "official-documentation.md").write_text("# Docs\n", encoding="utf-8")
+            (src / "source-code-map.md").write_text("# Map\n", encoding="utf-8")
+            (src / "source-manifest.json").write_text(
+                '[{"topic": "t", "source_type": "official documentation", "source_url": "https://example.com", "verification_status": "DOCUMENTED"}]\n',
+                encoding="utf-8",
+            )
+            (src / "version-history.md").write_text("# History\n", encoding="utf-8")
+            refs = root / "references"
+            refs.mkdir(parents=True, exist_ok=True)
+            (refs / "01-opencode-overview.md").write_text("# Overview\n", encoding="utf-8")
+            findings = self.validator.run_checks(root)
+            errors = [f for f in findings if f.severity == "ERROR"]
+            self.assertEqual(errors, [])
+            infos = [f for f in findings if f.severity == "INFO"]
+            self.assertTrue(any("differs from repository directory" in f.message for f in infos))
+
+    def test_skills_layout_name_mismatch_is_error(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            skills = pathlib.Path(tmp) / "skills"
+            root = skills / "wrong-folder"
+            root.mkdir(parents=True, exist_ok=True)
+            (root / "SKILL.md").write_text(
+                "---\nname: opencode-expert\ndescription: Technical research skill for OpenCode architecture.\n---\n\n# Skill\n",
+                encoding="utf-8",
+            )
+            (root / "README.md").write_text("ok\n", encoding="utf-8")
+            (root / "CHANGELOG.md").write_text("# Changelog\n", encoding="utf-8")
+            src = root / "sources"
+            src.mkdir(parents=True, exist_ok=True)
+            (src / "official-documentation.md").write_text("# Docs\n", encoding="utf-8")
+            (src / "source-code-map.md").write_text("# Map\n", encoding="utf-8")
+            (src / "source-manifest.json").write_text(
+                '[{"topic": "t", "source_type": "official documentation", "source_url": "https://example.com", "verification_status": "DOCUMENTED"}]\n',
+                encoding="utf-8",
+            )
+            (src / "version-history.md").write_text("# History\n", encoding="utf-8")
+            refs = root / "references"
+            refs.mkdir(parents=True, exist_ok=True)
+            (refs / "01-opencode-overview.md").write_text("# Overview\n", encoding="utf-8")
+            findings = self.validator.run_checks(root)
+            errors = [f for f in findings if f.severity == "ERROR"]
+            self.assertTrue(any("does not match directory name" in f.message for f in errors))
+
+    def test_windows_style_path_string_resolves(self):
+        """Ensure Path resolution works when skill-dir is passed as absolute path string."""
+        with tempfile.TemporaryDirectory() as tmp:
+            root = self._make_skill(tmp, "name: sample-skill\ndescription: A sample skill for testing.")
+            # Simulate CLI resolve
+            skill_dir = pathlib.Path(str(root)).resolve()
+            findings = self.validator.run_checks(skill_dir)
+            errors = [f for f in findings if f.severity == "ERROR"]
+            self.assertEqual(errors, [])
 
 
 if __name__ == "__main__":

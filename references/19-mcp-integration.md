@@ -26,8 +26,18 @@ OpenCode's MCP service is under `packages/core/src/mcp/**`, with server handlers
 
 ## MCP HTTP / remote transport
 
-- Whether a remote HTTP MCP transport is supported in the pinned OpenCode version is not established from the pinned source inspection.
-- Treat HTTP transport support as unverified until source inspection confirms it; do not label a transport missing without source evidence.
+**Evidence (pinned commit `ff90ed91607cabf420a369e9009539c1aa0932af`):** `SOURCE VERIFIED` for client transport construction.
+
+- `packages/core/src/mcp/client.ts` imports and constructs `StreamableHTTPClientTransport` for non-local MCP configs.
+- Local servers use `McpStdio.make` when `config.type === "local"`.
+- An `attached` mode reuses a caller-supplied transport.
+- HTTP session expiry / `SdkHttpError` handling and `terminateSession` paths exist in the same module.
+
+**Still PARTIAL (do not over-claim):**
+
+- Full production auth flows, every remote server flavor, and end-to-end reconnection under all failure modes were not exhaustively proven in Phase 2.
+- Treat lifecycle edge cases as PARTIAL until covered by targeted tests against live servers.
+
 
 ## HEX implications
 

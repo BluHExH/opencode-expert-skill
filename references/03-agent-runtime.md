@@ -8,7 +8,7 @@ model, streaming, tool, and continuation phases.
 ## Verified modules
 
 - `packages/core/src/session/runner/index.ts`: runner service and drain result.
-- `prompt.ts`: prompt construction.
+- `packages/core/src/session/prompt.ts`: prompt construction (not under `session/runner/`).
 - `llm.ts`: model invocation and continuation.
 - `step.ts`: one step outcome.
 - `publish-llm-event.ts`: publishes model/session events.

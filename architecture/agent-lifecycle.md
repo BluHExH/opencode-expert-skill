@@ -6,7 +6,7 @@ The core contains an agent registry (`packages/core/src/agent.ts`) and a session
 organized as drain, prompt, LLM, and step modules:
 
 - `packages/core/src/session/runner/index.ts`
-- `packages/core/src/session/runner/prompt.ts`
+- `packages/core/src/session/prompt.ts`
 - `packages/core/src/session/runner/llm.ts`
 - `packages/core/src/session/runner/step.ts`
 - `packages/core/src/session/runner/publish-llm-event.ts`

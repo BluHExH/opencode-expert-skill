@@ -85,3 +85,15 @@ Do not automatically change the pinned commit without reviewing the differences.
 ## Provider independence
 
 The Skill itself is provider-neutral and must not depend on one AI provider. Provider-specific usage examples may exist separately; the core workflow and evidence policy apply across hosts.
+
+
+## Validator notes (v1.1.1)
+
+Run from the skill root:
+
+```bash
+python scripts/validate_skill.py
+python -m pytest scripts/tests -q
+```
+
+The enclosing clone directory may differ from the skill `name` in `SKILL.md`. A strict name match is only required when the skill folder is nested under a directory named `skills/` (install layout).

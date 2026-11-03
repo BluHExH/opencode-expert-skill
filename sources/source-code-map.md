@@ -11,7 +11,7 @@ Pinned revision: `ff90ed91607cabf420a369e9009539c1aa0932af`; inspected 2026-11-0
 | Providers/models | `packages/core/src/provider.ts`, `packages/core/src/model.ts`, `packages/core/src/model-resolver.ts`, `packages/ai/src/**` |
 | TUI | `packages/tui/src/**` |
 | Server/protocol | `packages/server/src/**`, `packages/protocol/src/**`, `packages/httpapi-codegen/**` |
-| MCP | `packages/core/src/mcp/**`, `packages/server/src/handlers/mcp.ts` |
+| MCP | `packages/core/src/mcp/**` (stdio via `McpStdio`, HTTP via `StreamableHTTPClientTransport` in `client.ts`); server handlers if present under `packages/server` |
 | LSP | `packages/schema/src/config/lsp.ts`; runtime implementation not confirmed in core snapshot |
 | Plugins | `packages/core/src/plugin.ts`, `packages/core/src/plugin/**`, `packages/plugin/**` |
 | Skills | `packages/core/src/skill.ts`, `packages/core/src/skill/**` |

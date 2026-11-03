@@ -9,6 +9,7 @@ import re
 import sys
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Optional
 
 DEFAULT_SKILL_DIR = Path(__file__).resolve().parent.parent
 
@@ -54,7 +55,7 @@ class Finding:
     check: str
     message: str
     path: str = ""
-    line: int = None
+    line: Optional[int] = None
 
     def as_dict(self):
         return {
@@ -121,9 +122,30 @@ def check_frontmatter(skill_dir, findings):
             findings.append(Finding("ERROR", "frontmatter", "Invalid skill name: " + name, str(skill_file)))
         if not (1 <= len(name) <= MAX_NAME_LENGTH):
             findings.append(Finding("ERROR", "frontmatter", "Skill name length out of range (1-64): " + str(len(name)), str(skill_file)))
+        # Official Agent Skills install layout often uses skills/<name>/.
+        # Repository clones may use any directory name (e.g. opencode-expert-skill).
+        # Only enforce name==folder when nested under a "skills" parent directory.
         skill_dir_name = skill_dir.resolve().name
+        parent_name = skill_dir.resolve().parent.name
         if name != skill_dir_name:
-            findings.append(Finding("ERROR", "frontmatter", "Skill name '" + name + "' does not match directory name '" + skill_dir_name + "'", str(skill_dir / "SKILL.md")))
+            if parent_name.lower() == "skills":
+                findings.append(
+                    Finding(
+                        "ERROR",
+                        "frontmatter",
+                        "Skill name '" + name + "' does not match directory name '" + skill_dir_name + "' under skills/",
+                        str(skill_dir / "SKILL.md"),
+                    )
+                )
+            else:
+                findings.append(
+                    Finding(
+                        "INFO",
+                        "frontmatter",
+                        "Skill name '" + name + "' differs from repository directory '" + skill_dir_name + "' (allowed outside skills/ install layout)",
+                        str(skill_dir / "SKILL.md"),
+                    )
+                )
     if "description" in fields and fields["description"].strip() != "":
         if not (DESCRIPTION_MIN_LENGTH <= len(description) <= MAX_DESCRIPTION_LENGTH):
             findings.append(Finding("ERROR", "frontmatter", "Description length out of range (1-%d): %d" % (MAX_DESCRIPTION_LENGTH, len(description)), str(skill_file)))

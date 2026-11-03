@@ -1,5 +1,20 @@
 # Changelog
 
+## 2026-11-03 — OpenCode Expert Skill v1.1.1
+
+### Fixed
+- Corrected agent prompt module path: `packages/core/src/session/prompt.ts` (not `session/runner/prompt.ts`).
+- MCP HTTP: documented `StreamableHTTPClientTransport` as SOURCE VERIFIED at pin `ff90ed9…`; lifecycle edge cases remain PARTIAL.
+- Validator: repository clone directory may differ from skill `name`; strict name/folder match only under a `skills/` parent install layout.
+
+### Changed
+- Updated MCP reference, parity matrix, source-code-map, and source-manifest notes from Phase 2 audit.
+- Extended validator tests for alternate clone directory names.
+
+### Unchanged
+- Pinned OpenCode source remains `ff90ed91607cabf420a369e9009539c1aa0932af`.
+- LSP runtime remains PARTIAL/UNVERIFIED; server API request map remains PARTIAL.
+
 ## 2026-11-02 — OpenCode Expert Skill v1.1.0
 
 ### Added

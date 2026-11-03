@@ -74,7 +74,7 @@
     "source_file_path": "packages/core/src/mcp/index.ts",
     "symbol_or_section": "MCP.Service",
     "verification_status": "SOURCE VERIFIED",
-    "notes": "Registry, connections, tools, prompts and resources."
+    "notes": "Registry, connections, tools, prompts and resources. Client constructs StreamableHTTPClientTransport for remote; stdio for local. Auth/reconnect edge cases PARTIAL."
   },
   {
     "topic": "Skills discovery",
